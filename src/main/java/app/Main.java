@@ -12,7 +12,7 @@ public class Main {
 
         int port = parsePort(args);
 
-        var parallelQueueImpl = BatchingQueueImpl.<String>builder()
+        var batchingQueue = BatchingQueueImpl.<String>builder()
                 .setSize(10000)
                 .setBatchSize(5)
                 .setFlushTimeoutMills(5 * 1000)
@@ -23,11 +23,11 @@ public class Main {
                 .setCircuitBreaker(new CircuitBreaker(3, 10 * 1000))
                 .build();
 
-        var server = new SimpleTelnetServer(port, parallelQueueImpl::offer);
+        var server = new SimpleTelnetServer(port, batchingQueue::offer);
         server.start();
 
         // just example where shutdown
-        Runtime.getRuntime().addShutdownHook(new Thread(parallelQueueImpl::shutdown));
+        Runtime.getRuntime().addShutdownHook(new Thread(batchingQueue::shutdown));
     }
 
     private static int parsePort(String[] args) {
